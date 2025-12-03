@@ -1559,6 +1559,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         // --- 🚀 (नया) 'फ्लैश' (Flash) 'नोटिफिकेशन' (Notification) 'सिस्टम' (System) 🚀 ---
         const notificationContainer = document.getElementById('flash-notification-container');
         // 'डेटा' (data) 'पहले' (first) 'से' (from) 'ही' (only) '`dynamicData`' 'में' (in) 'है' (is), 'तो' (then) 'उसे' (him) 'इस्तेमाल' (use) 'करें' (Do)
+
+        // --- 🚀 (नया) नोटिफिकेशन दिखाने के लिए हेल्पर फंक्शन 🚀 ---
+        function showFlashNotification(message, type = 'info') {
+            if (!notificationContainer) return;
+
+            let icon = '🔥';
+            if (type === 'success') {
+                icon = '✅';
+            } else if (type === 'error') {
+                icon = '❌';
+            }
+
+            const notif = document.createElement('div');
+            notif.className = 'flash-notification';
+            // Using innerHTML to allow basic formatting like <br> or <strong>
+            notif.innerHTML = `${icon} ${message}`;
+
+            notificationContainer.appendChild(notif);
+
+            setTimeout(() => {
+                notif.remove();
+            }, 5000); // 5 सेकंड बाद हटा दें
+        }
+
         const liveActivitiesData = dynamicData.liveActivities;
         let lastActivityIndex = -1; // 'ताकि' (so that) 'रिपीट' (repeat) 'न' (not) 'हो' (happen)
 
@@ -1573,18 +1597,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     } while (randomIndex === lastActivityIndex);
                     lastActivityIndex = randomIndex;
 
-                    // 2. 'नया' (New) 'div' 'एलिमेंट' (element) 'बनाओ' (Make)
-                    const notif = document.createElement('div');
-                    notif.className = 'flash-notification';
-                    notif.innerHTML = `🔥 ${liveActivitiesData[randomIndex]}`;
-
-                    // 3. 'उसे' (Him) 'कंटेनर' (container) 'में' (in) 'जोड़ो' (Add)
-                    notificationContainer.appendChild(notif);
-
-                    // 4. 5 'सेकंड' (second) 'बाद' (after) 'उसे' (him) 'हटा' (remove) 'दो' (it) (CSS 'एनीमेशन' (animation) 'से' (from) 'मैच' (match) 'करता' (does) 'है' (is))
-                    setTimeout(() => {
-                        notif.remove();
-                    }, 5000);
+                    showFlashNotification(liveActivitiesData[randomIndex], 'info');
 
                 },
                 6000
@@ -1703,10 +1716,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     formData.append('upi_id_used', currentUpiId);
                     formData.append('screenshot', compressedFile, originalFile.name);
 
+                    // --- 🚀 (बदलाव) Formspree को डेटा भेजने के लिए URL बदलें 🚀 ---
+                    // ==================================================================
+                    // === महत्वपूर्ण: अपना Formspree URL यहाँ पेस्ट करें ===
+                    // ==================================================================
+                    const formspreeEndpoint = "YOUR_FORMSPREE_URL_HERE"; // उदा. "https://formspree.io/f/xxxxxxxx"
+
+                    if (formspreeEndpoint.includes("YOUR_FORMSPREE_URL_HERE")) {
+                        addLog('❌ एरर: Formspree URL सेट नहीं है!', 'log-error');
+                        throw new Error("डेवलपर: कृपया अपना Formspree URL index.html में डालें।");
+                    }
+
                     const t_start_upload = performance.now();
-                    const response = await fetch('buy_ticket.json', {
+                    const response = await fetch(formspreeEndpoint, {
                         method: 'POST',
-                        body: formData
+                        body: formData,
+                        headers: { 'Accept': 'application/json' } // Formspree के लिए यह ज़रूरी है
                     });
                     const t_end_upload = performance.now();
                     const uploadTime = (t_end_upload - t_start_upload) /
@@ -1721,28 +1746,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                     const data = await response.json();
 
-                    if (!response.ok) {
-                        throw new Error(data.message || `HTTP ${response.status}`);
-                    }
-
-                    if (data.success) {
+                    // Formspree से सफलता का जवाब 'ok: true' के रूप में आता है
+                    if (data.ok) {
                         addLog('🎉 बुकिंग सफल!', 'log-data');
 
-                        // --- (नया) 'लॉग्स' (Logs) 'को' (to) 'सक्सेस' (Success) 'व्यू' (View) 'में' (in) 'कॉपी' (Copy) 'करें' (Do) ---
-                        const successLogContainer = document.getElementById('success-log-area');
-                        const formLogContainer = document.getElementById('debug-log-area');
-                        if (successLogContainer && formLogContainer) {
-                            successLogContainer.innerHTML = formLogContainer.innerHTML;
-                        }
-                        // --- 'कॉपी' (Copy) 'खत्म' (End) ---
+                        // --- 🚀 (नया) एक नकली पर्चेज कोड बनाएँ क्योंकि Formspree यह नहीं देता 🚀 ---
+                        const namePart = document.getElementById('name').value.substring(0, 2).toUpperCase();
+                        const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
+                        const fakePurchaseCode = `PUR-${namePart}${randomPart}`;
 
-                        // 'सफलता' (Success) 'का' (of) 'बाकी' (rest) 'का' (of) 'कोड' (code)
-                        const purchaseCodeEl = document.getElementById('success-purchase-code');
-                        if (purchaseCodeEl && data.purchase_code) {
-                            purchaseCodeEl.innerText = data.purchase_code;
-                        }
-                        if (formView) formView.classList.add('hidden');
-                        if (successView) successView.classList.remove('hidden');
+                        // --- 🚀 (नया) मॉडल बंद करें और फ्लैश नोटिफिकेशन दिखाएं 🚀 ---
+                        closeModal(); // मॉडल को बंद करें
+                        showFlashNotification(`बुकिंग सफल! आपका पर्चेज कोड <strong>${fakePurchaseCode}</strong> है।`, 'success');
 
                     } else {
                         throw new Error(data.message);
@@ -2133,15 +2148,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     const result = await res.json();
 
                     if (result.success) {
-                        querySuccessMsg.innerText = "✅ आपका मैसेज सफलतापूर्वक भेजा गया!";
-                        querySuccessMsg.classList.remove('hidden');
+                        // --- 🚀 (नया) फॉर्म रीसेट करें और फ्लैश नोटिफिकेशन दिखाएं 🚀 ---
                         queryForm.reset();
+                        showFlashNotification("आपका मैसेज सफलतापूर्वक भेज दिया गया है!", 'success');
                     } else {
                         throw new Error(result.message || "Server error");
                     }
                 } catch (err) {
-                    queryErrorMsg.innerText = "❌ " + err.message;
-                    queryErrorMsg.classList.remove('hidden');
+                    // एरर होने पर फ्लैश नोटिफिकेशन दिखाएं
+                    showFlashNotification(err.message, 'error');
                 } finally {
                     querySubmitBtn.disabled = false;
                     querySubmitBtn.innerHTML = `<span class="btn-text">🚀 अपना सवाल भेजें</span>`;
