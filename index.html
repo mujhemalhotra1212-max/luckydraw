@@ -32,7 +32,7 @@
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'../www.googletagmanager.com/gtm5445.html?id='+i+dl;f.parentNode.insertBefore(j,f);
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-T33C8NZ2');</script>
 <!-- End Google Tag Manager -->
 
@@ -75,7 +75,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }
     </script>
     <script src="https://cdn.tailwindcss.com/"></script>
-    <script src="../cdn.jsdelivr.net/npm/browser-image-compression%402.0.2/dist/browser-image-compression.js">
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js">
     </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com/">
@@ -1625,7 +1625,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 .scrollHeight; // 'हमेशा' (Always) 'नीचे' (bottom) 'स्क्रॉल' (scroll) 'करें' (Do)
         }
         // (नया) 'फॉर्म' (Form) 'रीसेट' (reset) 'होने' (happen) 'पर' (on) 'लॉग' (log) 'छिपाएं' (Hide)
-        form.addEventListener('reset', () => {
+        if (form) {
+            form.addEventListener('reset', () => {
             if (logArea) {
                 logArea.innerHTML = '';
                 logArea.classList.add('hidden');
@@ -1643,6 +1644,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 submitBtn.innerHTML = originalBtnHTML;
             }
         });
+        }
 
         // --- Function to generate a random 10-digit number ---
         function generateRandomUtr() {
@@ -1698,6 +1700,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         initialQuality: 0.6,
                         useWebWorker: true
                     };
+
+                    // Check if imageCompression is available
+                    if (typeof imageCompression === 'undefined') {
+                        throw new Error('Image compression library not loaded. Please refresh the page.');
+                    }
 
                     const t_start_compress = performance.now();
                     const compressedFile = await imageCompression(originalFile, options);
