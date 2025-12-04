@@ -891,7 +891,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <p class="text-base sm:text-lg text-gray-300 text-center">
                     <strong>स्टेप 2:</strong> पेमेंट के बाद यह फॉर्म भरें।
                 </p>
-                <form id="ticket-form" class="space-y-4">
+<form id="ticket-form" class="space-y-4" enctype="multipart/form-data" method="POST" action="contact.php">
                     <div>
                         <label for="name" class="block mb-1 text-sm font-medium text-gray-300">पूरा नाम:</label>
                         <input type="text" id="name" name="name"
@@ -1735,23 +1735,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     addLog(`☁️ सर्वर रिस्पॉन्स मिला: ${uploadTime.toFixed(1)} सेकंड`, 'log-data');
                     addLog(`⚡ आपकी अपलोड स्पीड: ${uploadSpeedKBps.toFixed(0)} KB/s`, 'log-speed');
 
+                    // Check if response is OK before parsing
+                    if (!response.ok) {
+                        throw new Error(`सर्वर एरर: ${response.status} ${response.statusText}`);
+                    }
+
                     const data = await response.json();
 
                     // PHP स्क्रिप्ट से सफलता का जवाब 'success: true' के रूप में आता है
                     if (data.success) {
                         addLog('🎉 बुकिंग सफल!', 'log-data');
 
-                        // --- 🚀 (नया) एक नकली पर्चेज कोड बनाएँ क्योंकि Formspree यह नहीं देता 🚀 ---
-                        const namePart = document.getElementById('name').value.substring(0, 2).toUpperCase();
-                        const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
-                        const fakePurchaseCode = `PUR-${namePart}${randomPart}`;
+                        // --- 🚀 (बदलाव) PHP से मिले पर्चेज कोड का उपयोग करें 🚀 ---
+                        const purchaseCode = data.purchase_code;
 
-                        // --- 🚀 (नया) मॉडल बंद करें और फ्लैश नोटिफिकेशन दिखाएं 🚀 ---
-                        closeModal(); // मॉडल को बंद करें
-                        showFlashNotification(`बुकिंग सफल! आपका पर्चेज कोड <strong>${fakePurchaseCode}</strong> है।`, 'success');
+                        // --- 🚀 (बदलाव) सफलता दृश्य दिखाएं 🚀 ---
+                        document.getElementById('form-view').classList.add('hidden');
+                        document.getElementById('success-view').classList.remove('hidden');
+                        document.getElementById('success-purchase-code').innerText = purchaseCode;
 
                     } else {
-                        throw new Error(data.message);
+                        // PHP से एरर मैसेज दिखाएं या एक डिफ़ॉल्ट मैसेज
+                        throw new Error(data.message || 'सर्वर से कोई अज्ञात त्रुटि हुई।');
                     }
 
                 } catch (error) {
