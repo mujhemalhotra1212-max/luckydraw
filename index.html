@@ -1657,19 +1657,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 
-        // Verify form and button exist
-        if (!form) {
-            console.error('Form not found: ticket-form');
-        }
-        if (!submitBtn) {
-            console.error('Submit button not found: submit-btn');
-        }
-
-        if (form && submitBtn) {
-            console.log('Form and submit button found, attaching event listener');
+        if (form) {
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 console.log('Form submit event triggered');
+                if (!submitBtn) {
+                    console.error('Submit button not found!');
+                    alert('Error: Submit button not found. Please refresh the page.');
+                    return;
+                }
 
                 // 'पुराने' (Old) 'लॉग्स' (logs) 'साफ़' (clear) 'करें' (Do) 'और' (and) 'बटन' (button) 'सेट' (set) 'करें' (Do)
                 if (logArea) logArea.innerHTML = '';
@@ -1726,14 +1722,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                     // --- 🚀 (बदलाव) PHP स्क्रिप्ट को डेटा भेजने के लिए URL 🚀 ---
                     const endpoint = "contact.php";
-                    console.log('Sending data to:', endpoint);
 
                     const t_start_upload = performance.now();
                     const response = await fetch(endpoint, {
                         method: 'POST',
                         body: formData
                     });
-                    console.log('Response received:', response.status, response.statusText);
                     const t_end_upload = performance.now();
                     const uploadTime = (t_end_upload - t_start_upload) /
                         1000; // 'सेकंड' (second) 'में' (in)
@@ -1783,16 +1777,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     // 'क्योंकि' (because) '`closeModal`' 'फंक्शन' (function) 'उसे' (him) 'हैंडल' (handle) 'करेगा' (will do)
                 }
             });
-
-            // Also add click listener on button as backup
-            submitBtn.addEventListener('click', (e) => {
-                console.log('Submit button clicked');
-                // Let the form submit event handle it, but log for debugging
-            });
-        } else {
-            console.error('Cannot attach form submit handler: form or submitBtn not found');
-            if (!form) console.error('Form element missing');
-            if (!submitBtn) console.error('Submit button element missing');
         }
         // --- 7. 'स्टेटस' (Status) 'चेक' (Check) 'फॉर्म' (Form) 'लॉजिक' (Logic) ---
         const statusForm = document.getElementById('status-check-form');
