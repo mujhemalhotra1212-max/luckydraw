@@ -1,0 +1,17 @@
+# Allow POST requests to PHP files
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_METHOD} ^(GET|POST|PUT|DELETE|OPTIONS)$
+    RewriteRule ^(.*)$ - [L]
+</IfModule>
+
+# Allow POST method
+<Limit POST>
+    Allow from all
+</Limit>
+
+# Enable PHP file execution
+<FilesMatch "\.php$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
+

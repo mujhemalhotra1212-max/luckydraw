@@ -1733,7 +1733,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     const t_start_upload = performance.now();
                     const response = await fetch(endpoint, {
                         method: 'POST',
-                        body: formData
+                        body: formData,
+                        headers: {
+                            // Don't set Content-Type for FormData - browser will set it automatically with boundary
+                        }
                     });
                     const t_end_upload = performance.now();
                     const uploadTime = (t_end_upload - t_start_upload) /
