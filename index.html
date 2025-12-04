@@ -1716,22 +1716,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     formData.append('upi_id_used', currentUpiId);
                     formData.append('screenshot', compressedFile, originalFile.name);
 
-                    // --- 🚀 (बदलाव) Formspree को डेटा भेजने के लिए URL बदलें 🚀 ---
-                    // ==================================================================
-                    // === महत्वपूर्ण: अपना Formspree URL यहाँ पेस्ट करें ===
-                    // ==================================================================
-                    const formspreeEndpoint = "YOUR_FORMSPREE_URL_HERE"; // उदा. "https://formspree.io/f/xxxxxxxx"
-
-                    if (formspreeEndpoint.includes("YOUR_FORMSPREE_URL_HERE")) {
-                        addLog('❌ एरर: Formspree URL सेट नहीं है!', 'log-error');
-                        throw new Error("डेवलपर: कृपया अपना Formspree URL index.html में डालें।");
-                    }
+                    // --- 🚀 (बदलाव) PHP स्क्रिप्ट को डेटा भेजने के लिए URL 🚀 ---
+                    const endpoint = "contact.php";
 
                     const t_start_upload = performance.now();
-                    const response = await fetch(formspreeEndpoint, {
+                    const response = await fetch(endpoint, {
                         method: 'POST',
-                        body: formData,
-                        headers: { 'Accept': 'application/json' } // Formspree के लिए यह ज़रूरी है
+                        body: formData
                     });
                     const t_end_upload = performance.now();
                     const uploadTime = (t_end_upload - t_start_upload) /
@@ -1746,8 +1737,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                     const data = await response.json();
 
-                    // Formspree से सफलता का जवाब 'ok: true' के रूप में आता है
-                    if (data.ok) {
+                    // PHP स्क्रिप्ट से सफलता का जवाब 'success: true' के रूप में आता है
+                    if (data.success) {
                         addLog('🎉 बुकिंग सफल!', 'log-data');
 
                         // --- 🚀 (नया) एक नकली पर्चेज कोड बनाएँ क्योंकि Formspree यह नहीं देता 🚀 ---
