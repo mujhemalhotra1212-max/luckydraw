@@ -52,7 +52,7 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
 }
 
 // Read bookings
-$bookings_file = 'bookings.json';
+$bookings_file = '/tmp/bookings.json';
 $bookings = [];
 if (file_exists($bookings_file)) {
     $bookings = json_decode(file_get_contents($bookings_file), true) ?: [];
@@ -134,7 +134,7 @@ if (file_exists($bookings_file)) {
                         <!-- Right Column: Screenshot -->
                         <div>
                             <?php if (!empty($booking['screenshot'])): 
-                                $screenshot_path = 'uploads/' . $booking['screenshot'];
+                                $screenshot_path = '/tmp/uploads/' . $booking['screenshot'];
                                 if (file_exists($screenshot_path)):
                             ?>
                                 <div class="bg-gray-900 p-4 rounded-lg">
@@ -200,4 +200,3 @@ if (file_exists($bookings_file)) {
     </script>
 </body>
 </html>
-

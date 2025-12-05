@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     
     // Read bookings from JSON file
-    $json_file = 'bookings.json';
+    $json_file = '/tmp/bookings.json';
     
     if (!file_exists($json_file)) {
         echo json_encode([
@@ -97,4 +97,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     echo json_encode(['success' => false, 'message' => 'Method Not Allowed']);
 }
 ?>
-

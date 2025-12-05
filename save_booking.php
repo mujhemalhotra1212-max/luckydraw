@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_FILES['screenshot']) && $_FILES['screenshot']['error'] === UPLOAD_ERR_OK) {
         $screenshot_name = $_FILES['screenshot']['name'];
         // Optionally save the file
-        $upload_dir = 'uploads/';
+        $upload_dir = '/tmp/uploads/';
         if (!file_exists($upload_dir)) {
             mkdir($upload_dir, 0777, true);
         }
@@ -50,12 +50,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         'utr' => $utr,
         'upi_id_used' => $upi_id_used,
         'screenshot' => $screenshot_name,
-        'payment_status' => 'Pending', // Default status
         'timestamp' => date('Y-m-d H:i:s')
     ];
     
     // Read existing bookings from JSON file
-    $json_file = 'bookings.json';
+    $json_file = '/tmp/bookings.json';
     $bookings = [];
     
     if (file_exists($json_file)) {
@@ -90,4 +89,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     echo json_encode(['success' => false, 'message' => 'Method Not Allowed']);
 }
 ?>
-
