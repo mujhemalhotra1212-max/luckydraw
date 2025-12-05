@@ -2,14 +2,31 @@
     "version": 2,
     "builds": [
         {
-            "src": "api/*.php",
+            "src": "api/**/*.php",
             "use": "@vercel/php"
+        },
+        {
+            "src": "package.json",
+            "use": "@vercel/static-build",
+            "config": { "distDir": "." }
         }
     ],
     "routes": [
         {
+            "src": "/save_booking.php",
+            "dest": "/api/save_booking.php"
+        },
+        {
+            "src": "/check_status.php",
+            "dest": "/api/check_status.php"
+        },
+        {
+            "src": "/update_status.php",
+            "dest": "/api/update_status.php"
+        },
+        {
             "src": "/(.*)",
-            "dest": "/api/index.php"
+            "dest": "/$1"
         }
     ]
 }
