@@ -1731,7 +1731,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     formData.append('screenshot', compressedFile, originalFile.name);
 
                     // --- 🚀 (बदलाव) PHP स्क्रिप्ट को डेटा भेजने के लिए URL 🚀 ---
-                    const endpoint = "contact.php";
+                    const endpoint = "save_booking.php";
 
                     const t_start_upload = performance.now();
                     const response = await fetch(endpoint, {
@@ -1845,7 +1845,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     `<div class="flex justify-center p-4"><div class="loading-spinner"></div></div>`;
 
                 try {
-                    const response = await fetch('check_status.json', {
+                    const response = await fetch('check_status.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -1883,84 +1883,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          * 'स्टेटस' (Status) 'HTML' (html) 'बनाने' (Create) 'का' (Of) 'फंक्शन' (Function)
          */
         function buildSuccessHtml(data) {
-            const details = data.details;
-            let statusClass = 'status-pending';
-            if (details.status === 'Verified') {
-                statusClass = 'status-approved';
-            } else if (details.status === 'Rejected') {
-                statusClass = 'status-rejected';
-            }
-
-            let ticketsHtml = '';
-            const userTickets = data.tickets || [];
-
-            if (details.status === 'Verified') {
-                if (userTickets.length > 0) {
-                    userTickets.forEach(ticket => {
-                        let ticketClass = "bg-gray-700 border-gray-600";
-                        let prizeHtml =
-                            `<span class="text-xs text-gray-400">(रिजल्ट का इंतज़ार है)</span>`;
-
-                        if (data.draw_announced) {
-                            if (ticket.is_winner) {
-                                ticketClass = "ticket-winner";
-                                prizeHtml = `<span class="font-bold">🎉 ${ticket.prize} 🎉</span>`;
-                            } else {
-                                prizeHtml = `<span class="text-xs text-gray-500">(यह नहीं जीता)</span>`;
-                            }
-                        }
-
-                        ticketsHtml += `
-                        <div class="${ticketClass} p-3 rounded-lg text-center font-mono shadow-md border transition-all duration-300">
-                            <span class="font-bold text-lg tracking-wider">${ticket.ticket_number}</span>
-                            <div class="mt-1">${prizeHtml}</div>
-                        </div>
-                        `;
-                    });
-                } else {
-                    ticketsHtml =
-                        `<p class="text-yellow-400 text-center col-span-1 sm:col-span-2 md:col-span-3">आपके टोकन जनरेट हो रहे हैं... कृपया 1 मिनट बाद दोबारा चेक करें।</p>`;
-                }
-            }
-
-            // 3. 'फाइनल' (Final) 'HTML' (html)
+            const booking = data.data || data.details || {};
+            
+            // Format exactly like screenshot
             return `
-                <div class="bg-gray-900 border border-gray-700 rounded-lg p-6 space-y-6">
-                    <div>
-                        <h4 class="text-2xl font-bold text-purple-300 mb-4">आपकी खरीद की डिटेल्स</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-lg">
-                            <div><strong>नाम:</strong> ${details.name}</div>
-                            <div><strong>मोबाइल:</strong> *****${details.mobile.slice(-4)}</div>
-                            <div><strong>Code:</strong> ${details.purchase_code}</div>
-                            <div><strong>कुल टिकट:</strong> ${details.ticket_count}</div>
-                            <div><strong>कुल कीमत:</strong> ₹${details.total_amount}</div>
-                            <div><strong>पेमेंट स्टेटस:</strong> 
-                                <span class="font-bold ${statusClass}">${details.status}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        ${
-                            data.draw_announced 
-                            ? (data.user_is_winner 
-                                ? '<h4 class="text-3xl font-bold text-center text-green-400 animate-pulse">🎉 बधाई हो! आप जीत गए हैं! 🎉</h4>' 
-                                : '<h4 class="text-2xl font-bold text-center text-gray-400">रिजल्ट आ गया है (आप इस बार नहीं जीते)</h4>')
-                            : `<h4 class="text-2xl font-bold text-center text-yellow-400">
-                                 रिजल्ट अभी घोषित नहीं हुआ है। ड्रॉ की तारीख: 
-                                 <span class="block text-3xl">${dateDisplay.innerText.replace('ड्रॉ की तारीख: ','')}</span>
-                              </h4>`
-                        }
-                    </div>
-                    <div>
-                        <h4 class="text-2xl font-bold text-purple-300 mb-4">आपके लकी टोकन</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            ${ticketsHtml}
+                <div class="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-xl p-6 sm:p-8 space-y-6 shadow-xl">
+                    <h3 class="text-3xl font-bold text-center text-purple-300 mb-6">आपकी खरीद की डिटेल्स</h3>
+                    
+                    <div class="space-y-4 text-white text-lg">
+                        <div><strong>नाम:</strong> ${booking.name || 'N/A'}</div>
+                        <div><strong>मोबाइल:</strong> ${booking.mobile || 'N/A'}</div>
+                        <div><strong>Code:</strong> <span class="font-mono text-yellow-400">${booking.purchase_code || 'N/A'}</span></div>
+                        <div><strong>कुल टिकट:</strong> ${booking.ticket_count || 1}</div>
+                        <div><strong>कुल कीमतः</strong> <span class="text-yellow-400 font-bold">₹${booking.total_price || 101}</span></div>
+                        <div>
+                            <strong>पेमेंट स्टेटस:</strong> 
+                            <span class="font-bold ${
+                                booking.payment_status === 'Approved' ? 'text-green-400' :
+                                booking.payment_status === 'Rejected' ? 'text-red-400' :
+                                'text-orange-400'
+                            }">${booking.payment_status || 'Pending'}</span>
                         </div>
                     </div>
                     
-                    ${(details.status === 'Rejected') ? `<p class="text-center text-red-400 font-bold text-lg mt-4">आपका पेमेंट \'Rejected\' दिखा रहा है। कृपया हमारे सपोर्ट से संपर्क करें।</p>` : ''}
-                    ${(details.status === 'Pending') ? `<p class="text-center text-yellow-400 font-bold text-lg mt-4">आपका पेमेंट अभी \'Pending\' है। हमारी टीम जल्द ही इसे अप्रूव करेगी।</p>` : ''}
+                    <div class="pt-4 border-t border-gray-700 text-center space-y-3">
+                        <p class="text-white text-lg">रिजल्ट अभी घोषित नहीं हुआ है। ड्रॉ की तारीख:</p>
+                        <p class="text-2xl sm:text-3xl font-bold text-yellow-400">${booking.draw_date || '1 जनवरी 2026'}</p>
+                    </div>
                     
+                    <div class="pt-4 border-t border-gray-700 text-center">
+                        <h4 class="text-xl font-bold text-purple-300 mb-2">आपके लकी टोकन</h4>
+                        <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                            <p class="text-2xl font-mono font-bold text-yellow-400">${booking.purchase_code || 'N/A'}</p>
+                        </div>
+                    </div>
                 </div>
             `;
         }

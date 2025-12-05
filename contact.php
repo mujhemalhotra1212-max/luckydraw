@@ -13,96 +13,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-    $to = 'mujhemalhotra1212@gmail.com';
-    $from = 'noreply@luckydraw.com';
+        'token' => $token,
+        'ticket_count' => $ticket_count,
+        'timestamp' => date('Y-m-d H:i:s')
+    ];
+            $json_data = file_get_contents($log_file);
+            $bookings = json_decode($json_data, true);
+            if (!is_array($bookings)) {
+            }
+        }
+        // नई बुकिंग जोड़ें
+        $bookings[] = $new_booking;
+       $e) {
 
-    // --- UNIQUE PURCHASE CODE ---
-    $namePart = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $_POST['name'] ?? 'XX'), 0, 2));
-    $randomPart = strtoupper(substr(bin2hex(random_bytes(3)), 0, 5));
-    $purchaseCode = "PUR-" . $namePart . $randomPart;
+        echo json_encode(['success' => false, 'message' => 'डेटा सहेजने में विफल: ' . $e->getMessage()]);
+      
+    // --- उपयोगकर्ता को ईमेल भेजें ---
+    $to = $user_email;
+    $from_email = 'mujhemalhotra1212@gmail.com'; // भेजने वाला ईमेल
+    $from_name = 'जीत के धमाके';
+    $subject = 'आपका जीत के धमाके का लकी टोकन!';
 
-    $name = trim($_POST['name'] ?? '');
-    $mobile = trim($_POST['mobile'] ?? '');
-    $ticket_count = trim($_POST['ticket_count'] ?? '');
-    $utr = trim($_POST['utr'] ?? '');
-    $upi_id_used = trim($_POST['upi_id_used'] ?? '');
+    // --- ईमेल हेडर ---
+    $headers = "From: \"$from_name\" <$from_email>\r\n";
+    $hnt-Type: text/html; charset=UTF-8\r\n";
 
-    $subject = "जीत के धमाके - नई टिकट बुकिंग: " . $name;
-
-    // Boundary
-    $boundary = md5(time());
-
-    // --- HEADERS ---
-    $headers = "From: $from\r\n";
-    $headers .= "Reply-To: $from\r\n";
-    $headers .= "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: multipart/mixed; boundary=\"$boundary\"";
-
-    // --- HTML MESSAGE BODY ---
-    $message = "--$boundary\r\n";
-    $message .= "Content-Type: text/html; charset=UTF-8\r\n\r\n";
-
+    // --- HTML ईमेल संदेश ---
     $message .= "
-    <html><body>
-        <h2>जीत के धमाके - नई बुकिंग</h2>
-        <p><strong>नाम:</strong> $name</p>
-        <p><strong>WhatsApp नंबर:</strong> $mobile</p>
-        <p><strong>Purchase Code:</strong> $purchaseCode</p>
-        <p><strong>टोकन संख्या:</strong> $ticket_count</p>
-        <p><strong>UTR/Transaction ID:</strong> $utr</p>
-        <p><strong>UPI ID:</strong> $upi_id_used</p>
-        <p>पेमेंट स्क्रीनशॉट अटैचमेंट में है।</p>
-    </body></html>
-    ";
+    <html>
+    <body style='font-family: Arial, sans-serif; color: #333;'>
+        <h2 style='color: #6a0dad;'>नमस्ते $name,</h2>
+        <p>जीत के धमाके लकी ड्रॉ में भाग लेने के लिए धन्यवाद!</p>
+        <p>आपका यूनिक लकी टोकन है:</p>
+        <p style='font-size: 24px; font-weight: bold; color: #d97706; border: 2px dashed #6a0dad; padding: 10px; text-align: center;'>
+            $token
+        </p>
+        <p>कृपया इस टोकन को भविष्य के लिए संभाल कर रखें। ड्रॉ के परिणाम हमारी वेबसाइट पर घोषित किए जाएंगे।</p>
+        <p>शुभकामनाएं!</p>
+        <p><strong>- टीम जीत के धमाके</strong></p>
+    </body>
+    </html>
 
-    // --- ATTACHMENT (Screenshot) ---
-    if (isset($_FILES['screenshot']) && $_FILES['screenshot']['error'] === UPLOAD_ERR_OK) {
-
-        $file_name = $_FILES['screenshot']['name'];
-        $file_type = $_FILES['screenshot']['type'];
-        $file_content = chunk_split(base64_encode(file_get_contents($_FILES['screenshot']['tmp_name'])));
-
-        $message .= "--$boundary\r\n";
-        $message .= "Content-Type: $file_type; name=\"$file_name\"\r\n";
-        $message .= "Content-Disposition: attachment; filename=\"$file_name\"\r\n";
-        $message .= "Content-Transfer-Encoding: base64\r\n\r\n";
-        $message .= $file_content . "\r\n";
-    }
-
-    $message .= "--$boundary--";
-
-    // --- LOG FILE ---
-    $log = "================================\n";
-    $log .= "Timestamp: " . date("Y-m-d H:i:s") . "\n";
-    $log .= "Name: $name\n";
-    $log .= "Mobile: $mobile\n";
-    $log .= "Purchase Code: $purchaseCode\n";
-    $log .= "Ticket Count: $ticket_count\n";
-    $log .= "UTR: $utr\n";
-    $log .= "UPI ID: $upi_id_used\n";
-    $log .= "Screenshot: " . ($file_name ?? 'No file') . "\n";
-    $log .= "================================\n\n";
-
-    file_put_contents("bookings.log", $log, FILE_APPEND);
-
-    // --- SEND EMAIL ---
-    if (mail($to, $subject, $message, $headers)) {
-        echo json_encode([
-            'success' => true,
-            'message' => 'Email sent successfully.',
-            'purchase_code' => $purchaseCode
-        ]);
-    } else {
-        error_log("Mail failed", 3, "php_errors.log");
-
-        echo json_encode([
-            'success' => true,
-            'message' => 'Booking logged, email failed.',
-            'purchase_code' => $purchaseCode
-        ]);
-    }
-
-} else {
+    // --- ईमेलosage' => 'बुकिंग सफल हुई और ईमेल भेज दिया गया है।',
+            'token' => $token
+        ]
+} els$d
     // Debug: Log the actual request method received
     $actualMethod = $_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN';
     error_log("contact.php received method: " . $actualMethod);
@@ -114,4 +69,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         'received_method' => $actualMethod
     ]);
 }
-?>
