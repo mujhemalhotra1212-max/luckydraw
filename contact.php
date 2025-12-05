@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit;
 }
 
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         'token' => $token,
